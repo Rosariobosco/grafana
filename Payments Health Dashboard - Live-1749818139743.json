@@ -1,0 +1,2434 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 203,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 51,
+      "panels": [],
+      "title": "Payment Capture Stats",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed Captures %"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "#EAB839",
+                      "value": 1
+                    },
+                    {
+                      "color": "orange",
+                      "value": 15
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 20
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Successful Captures %"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  COUNT(*) AS `Total Captures`,\n\n  -- Successful capture count\n  SUM(CASE WHEN JSON_VALUE(labels.event_name) = 'payment_captured' THEN 1 ELSE 0 END) AS `Successful Captures`,\n\n  -- Failed capture count (includes multiple failure events)\n  SUM(CASE WHEN JSON_VALUE(labels.event_name) IN ('payment_capture_failed', 'payment_captured.error') THEN 1 ELSE 0 END) AS `Failed Captures`,\n\n  -- Failed capture percentage\n  (SUM(CASE WHEN JSON_VALUE(labels.event_name) IN ('payment_capture_failed', 'payment_captured.error') THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS `Failed Captures %`,\n\n  -- Successful capture percentage\n  (SUM(CASE WHEN JSON_VALUE(labels.event_name) = 'payment_captured' THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS `Successful Captures %`\n\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  $__timeFilter(timestamp)\n  AND JSON_VALUE(json_payload.paymentProvider) IN ($paymentProvider)\n  AND JSON_VALUE(labels.event_name) IN (\n    'payment_captured',\n    'payment_capture_failed',\n    'payment_captured.error'\n  )\n  AND (\n  '$anywhereAccountId' = ''\n  OR json_value(json_payload.customerKey) = '$anywhereAccountId'\n  );\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payment Capture Stats",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "click here to filter",
+              "url": "https://grafana.anywhere.co/d/ael1nb6lw76dcd/payments-health-dashboard-live?orgId=1&var-paymentProvider=${__data.fields[\"Payment Provider\"]}&from=${__from}&to=${__to}#L-35"
+            }
+          ],
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Failed Captures %"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    },
+                    {
+                      "color": "#EAB839",
+                      "value": 1
+                    },
+                    {
+                      "color": "orange",
+                      "value": 15
+                    },
+                    {
+                      "color": "dark-red",
+                      "value": 20
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Successful Captures %"
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "10%+"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#FF9830",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5%+"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 50,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.7,
+        "colorByField": "Failed Captures %",
+        "fullHighlight": true,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 0,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  JSON_VALUE(json_payload.paymentProvider) AS `Payment Provider`,\n\n  -- Failed capture percentage\n  (SUM(CASE WHEN JSON_VALUE(labels.event_name) IN ('payment_capture_failed', 'payment_captured.error') THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS `Failed Captures %`\n\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  $__timeFilter(timestamp)\n  AND JSON_VALUE(json_payload.paymentProvider) IN ($paymentProvider)\n  AND JSON_VALUE(labels.event_name) IN (\n    'payment_captured',\n    'payment_capture_failed',\n    'payment_captured.error'\n  )\n  AND (\n  '$anywhereAccountId' = ''\n  OR json_value(json_payload.customerKey) = '$anywhereAccountId'\n  )\nGROUP BY\n  JSON_VALUE(json_payload.paymentProvider)\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payment Capture failed Stats in %",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 40,
+      "panels": [],
+      "title": "Total Payment Captures per PSP",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of Successful payments captures.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "PAYPAL Capture Fail Count"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": []
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 41,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n    -- Total capture count (successful + failed captures)\n  COUNT(*) AS `Total Capture Count`,\n  \n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  \n  -- Successful capture count\n  SUM(CASE WHEN json_value(labels.event_name) = 'payment_captured' THEN 1 ELSE 0 END) AS `Successful Capture Count`,\n\n  -- Failed capture count (includes multiple failure events)\n  SUM(CASE WHEN json_value(labels.event_name) IN ('payment_capture_failed', 'payment_captured.error') THEN 1 ELSE 0 END) AS `Failed Capture Count`\n\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) IN ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\n  AND json_value(labels.event_name) IN ('payment_captured', 'payment_capture_failed', 'payment_captured.error')\nGROUP BY\n  paymentProvider",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments capture Success",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 36,
+      "panels": [],
+      "title": "Errors",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "Details of errors",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Details"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "json-view"
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Payment Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Event Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 198
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Message"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 208
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Anywhere Account id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 296
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trace Id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Logs",
+                    "url": "https://console.cloud.google.com/logs/query;query=SEARCH%2528%22${__data.fields[\"Trace Id\"]}%22%2529;startTime=﻿${__from:date:iso}﻿;endTime=${__to:date:iso}?project=adaptive-payments"
+                  }
+                ]
+              },
+              {
+                "id": "displayName",
+                "value": "Logs"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Anywhere Account ID"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 191
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 39,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Currency"
+          }
+        ]
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  JSON_VALUE(json_payload.customerKey) `Anywhere Account ID`,\n  JSON_VALUE(json_payload.paymentProvider) `Payment Provider`,\n  timestamp,\n  JSON_VALUE(json_payload.totalAmount.currency) `Currency`,\n  JSON_VALUE(json_payload.totalAmount.amount) `Amount`,\n  TO_JSON_STRING(json_payload) `Error Details`,\n  trace `Trace Id`\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  severity = 'ERROR'\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\n  AND (\n  '$anywhereAccountId' = ''\n  OR json_value(json_payload.customerKey) = '$anywhereAccountId'\n  )\nORDER BY\n  timestamp asc\nLIMIT 1000",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Errors (latest 1000)",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 29,
+      "panels": [],
+      "title": "Payment Capture Failure",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "Details of capture failures",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Details"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "json-view"
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Payment Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 35,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  timestamp,\n  json_value(json_payload.paymentProvider) `Payment Provider`,\n  JSON_VALUE(json_payload.customerKey) `Anywhere Account id`,\n  TO_JSON_STRING(json_payload.error) `Error Details`\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('payment_capture_failed' , 'payment_captured.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\n  AND (\n  '$anywhereAccountId' = ''\n  OR json_value(json_payload.customerKey) = '$anywhereAccountId'\n  )\nORDER BY\n  timestamp desc,\n  `Payment Provider`\n  ",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Capture failures",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 1,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "PAYPAL Capture Fail Count"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 42,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Capture Fail Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('payment_capture_failed' , 'payment_captured.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  time asc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments capture failed",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 32,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Capture Fail Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('payment_capture_failed' , 'payment_captured.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  paymentProvider,\n  time desc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments capture failed",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 45,
+      "panels": [],
+      "title": "Payment Checkout Failures",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "Details of Authorize failures",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Details"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "json-view"
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Payment Provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 44,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  timestamp,\n  json_value(json_payload.paymentProvider) `Payment Provider`,\n  JSON_VALUE(json_payload.customerKey) `Anywhere Account id`,\n  TO_JSON_STRING(json_payload.error) `Error Details`\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('checkout.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\n  AND (\n  '$anywhereAccountId' = ''\n  OR json_value(json_payload.customerKey) = '$anywhereAccountId'\n  )\nORDER BY\n  timestamp desc,\n  `Payment Provider`\n  ",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payment Checkout failures",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 1,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "Authorise Fail Count"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "id": 46,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Authorise Fail Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('checkout.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  paymentProvider,\n  time",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payment Checkout failures",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "id": 47,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Authorise Fail Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('checkout.error'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  paymentProvider,\n  time",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments Checkout Failures",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "id": 52,
+      "panels": [],
+      "title": "Payment Capture Success",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 1,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "PAYPAL Capture Success Count"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 55
+      },
+      "id": 53,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Capture Success Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('payment_captured'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  time asc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments capture Success",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "id": 54,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Capture Success Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('payment_captured'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  paymentProvider,\n  time desc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Payments capture failed",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 57,
+      "panels": [],
+      "title": "Checkout Success",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 1,
+            "drawStyle": "line",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "STRIPE Checkout Success Count"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "id": 55,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Checkout Success Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('checkout'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  time asc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Checkout Success",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-bigquery-datasource",
+        "uid": "fegsr8f697jlsc"
+      },
+      "description": "The total number of failed payments captures. This occurs for multiple reasons, e.g. invalid credit card data",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "id": 56,
+      "interval": "1h",
+      "maxDataPoints": 60,
+      "options": {
+        "cellHeight": "md",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-bigquery-datasource",
+            "uid": "fegsr8f697jlsc"
+          },
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  json_value(json_payload.paymentProvider) AS paymentProvider,\n  count(*) AS `Checkout Success Count`,\nFROM\n  `adaptive-payments.events._AllLogs`\nWHERE\n  (json_value(labels.event_name) in ('checkout'))\n  AND $__timeFilter(timestamp)\n  AND json_value(json_payload.paymentProvider) IN ($paymentProvider)\n  AND (json_value(json_payload.totalAmount.currency) in ($currency) OR json_value(json_payload.totalAmount.currency) IS NULL)\nGROUP BY\n  paymentProvider,\n  time\nORDER BY\n  paymentProvider,\n  time desc",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Checkout Success",
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "paymentProvider"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": false
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "Stripe"
+          ],
+          "value": [
+            "STRIPE"
+          ]
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Payment Provider",
+        "multi": true,
+        "name": "paymentProvider",
+        "options": [
+          {
+            "selected": false,
+            "text": "Square",
+            "value": "SQUARE"
+          },
+          {
+            "selected": true,
+            "text": "Stripe",
+            "value": "STRIPE"
+          },
+          {
+            "selected": false,
+            "text": "Cash",
+            "value": "CASH"
+          },
+          {
+            "selected": false,
+            "text": "LawPay",
+            "value": "LAWPAY"
+          },
+          {
+            "selected": false,
+            "text": "PayPal",
+            "value": "PAYPAL"
+          }
+        ],
+        "query": "Square : SQUARE, Stripe : STRIPE, Cash : CASH, LawPay : LAWPAY, PayPal : PAYPAL",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "HKD",
+            "MNT",
+            "MDL",
+            "CAD",
+            "INR",
+            "PEN",
+            "KRW",
+            "CNY",
+            "BHD",
+            "EGP",
+            "JMD",
+            "BRL",
+            "KES",
+            "NZD",
+            "NIO",
+            "ANG",
+            "PLN",
+            "PHP",
+            "BZD",
+            "GBP",
+            "CHF",
+            "PYG",
+            "KWD",
+            "DKK",
+            "JPY",
+            "KYD",
+            "IDR",
+            "VND",
+            "ARS",
+            "HUF",
+            "AUD",
+            "HNL",
+            "NGN",
+            "THB",
+            "CRC",
+            "XAF",
+            "TRY",
+            "COP",
+            "PAB",
+            "XOF",
+            "SGD",
+            "AED",
+            "CZK",
+            "SEK",
+            "CLP",
+            "SAR",
+            "BAM",
+            "BGN",
+            "BSD",
+            "ZAR",
+            "EUR",
+            "XCD",
+            "TTD",
+            "BBD",
+            "RON",
+            "BND",
+            "TWD",
+            "MYR",
+            "USD",
+            "NOK",
+            "MXN",
+            "ILS",
+            "RSD",
+            "AWG",
+            "UAH",
+            "COU",
+            "QAR",
+            "DOP"
+          ],
+          "value": [
+            "HKD",
+            "MNT",
+            "MDL",
+            "CAD",
+            "INR",
+            "PEN",
+            "KRW",
+            "CNY",
+            "BHD",
+            "EGP",
+            "JMD",
+            "BRL",
+            "KES",
+            "NZD",
+            "NIO",
+            "ANG",
+            "PLN",
+            "PHP",
+            "BZD",
+            "GBP",
+            "CHF",
+            "PYG",
+            "KWD",
+            "DKK",
+            "JPY",
+            "KYD",
+            "IDR",
+            "VND",
+            "ARS",
+            "HUF",
+            "AUD",
+            "HNL",
+            "NGN",
+            "THB",
+            "CRC",
+            "XAF",
+            "TRY",
+            "COP",
+            "PAB",
+            "XOF",
+            "SGD",
+            "AED",
+            "CZK",
+            "SEK",
+            "CLP",
+            "SAR",
+            "BAM",
+            "BGN",
+            "BSD",
+            "ZAR",
+            "EUR",
+            "XCD",
+            "TTD",
+            "BBD",
+            "RON",
+            "BND",
+            "TWD",
+            "MYR",
+            "USD",
+            "NOK",
+            "MXN",
+            "ILS",
+            "RSD",
+            "AWG",
+            "UAH",
+            "COU",
+            "QAR",
+            "DOP"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-bigquery-datasource",
+          "uid": "fegsr8f697jlsc"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Currency",
+        "multi": true,
+        "name": "currency",
+        "options": [],
+        "query": {
+          "editorMode": "code",
+          "format": 1,
+          "location": "US",
+          "project": "anywhere-cloudops-production",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  distinct json_value(json_payload.totalAmount.currency) AS Currency,  \nFROM `adaptive-payments.events._AllLogs`\n",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "description": "Anywhere account Id is the setmore Id or the customer-key",
+        "hide": 0,
+        "label": "Anywhere Account ID",
+        "name": "anywhereAccountId",
+        "options": [],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Payments Health Dashboard - Live",
+  "uid": "ael1nb6lw76dcd",
+  "version": 38,
+  "weekStart": ""
+}
